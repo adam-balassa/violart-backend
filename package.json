@@ -1,0 +1,27 @@
+{
+  "name": "violart-backend",
+  "version": "1.0.0",
+  "description": "---",
+  "scripts": {
+    "build": "tsc",
+    "lint": "tslint --project tsconfig.json src/**/**.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bizmut32/violart-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bizmut32/violart-backend/issues"
+  },
+  "homepage": "https://github.com/bizmut32/violart-backend#readme",
+  "dependencies": {
+    "aws-sdk": "^2.863.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.34",
+    "tslint": "^5.20.1",
+    "typescript": "^3.3.3"
+  }
+}

@@ -1,5 +1,7 @@
-exports.handler = async event => {
-    const { sender, subject, body } = event
+import { EmailContent } from './model';
+
+export async function handler(event: EmailContent): Promise<string> {
+    const { sender, subject, body } = event;
     return `
     <h1>Üzenet érkezett a violartstudio.com-ról</h1>
     <div style="background-color: #0001; border-radius: 10px; padding: 8px 16px">
@@ -8,5 +10,5 @@ exports.handler = async event => {
       <b>Üzenet</b>:
       <p>${body}</p>
     </div>
-  `
+  `;
 }
