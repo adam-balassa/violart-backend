@@ -1,7 +1,7 @@
 name: Upload Scripts to S3
 on: 
   push:
-    branches: [master]
+    branches: [main]
 
 jobs:
   deploy:
