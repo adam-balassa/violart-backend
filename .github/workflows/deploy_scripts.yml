@@ -10,8 +10,6 @@ jobs:
     - uses: actions/checkout@v2
     - name: Set up S3 sync
       uses: jakejarvis/s3-sync-action@master
-      with:
-        args: --acl public-read --follow-symlinks --delete
       env:
         AWS_S3_BUCKET: violart
         DEST_DIR: artifacts
