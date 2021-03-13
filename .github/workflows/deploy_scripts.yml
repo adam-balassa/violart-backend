@@ -4,7 +4,7 @@ on:
     branches: [main]
 
 jobs:
-  build: 
+  deploy: 
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -20,9 +20,7 @@ jobs:
 
     - name: Build
       run: npm run build
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
+
     - name: Set up S3 sync
       uses: jakejarvis/s3-sync-action@master
       with:
