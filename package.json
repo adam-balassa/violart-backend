@@ -5,7 +5,7 @@
   "scripts": {
     "build": "tsc --outDir dist",
     "build:prod": "tsc",
-    "lint": "tslint --project tsconfig.json src/**/**.ts && cfn-lint validate ./src/template.yml"
+    "lint": "tslint --project tsconfig.json src/**/**.ts && cfn-lint validate ./src/email/template.yml"
   },
   "repository": {
     "type": "git",
