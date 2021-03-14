@@ -55,7 +55,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName: !Sub send-email-lambda-policy-${Environment}
-      Roles: [SendEmailRole]
+      Roles: [!Ref SendEmailRole]
       PolicyDocument: 
         Version: "2012-10-17"
         Statement:
@@ -110,7 +110,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName: !Sub generate-email-lambda-policy-${Environment}
-      Roles: [GenerateEmailRole]
+      Roles: [!Ref GenerateEmailRole]
       PolicyDocument: 
         Version: "2012-10-17"
         Statement:
@@ -162,7 +162,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName: !Sub generate-subject-lambda-policy-${Environment}
-      Roles: [GenerateSubjectRole]
+      Roles: [!Ref GenerateSubjectRole]
       PolicyDocument: 
         Version: "2012-10-17"
         Statement:
