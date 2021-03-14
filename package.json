@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "description": "---",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --outDir dist",
+    "build:prod": "tsc",
     "lint": "tslint --project tsconfig.json src/**/**.ts"
   },
   "repository": {

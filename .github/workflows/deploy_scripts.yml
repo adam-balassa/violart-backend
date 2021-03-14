@@ -19,7 +19,7 @@ jobs:
       run: npm run lint
 
     - name: Build
-      run: npm run build
+      run: npm run build:prod
 
     - name: Set up S3 sync
       uses: jakejarvis/s3-sync-action@master
