@@ -21,6 +21,15 @@ jobs:
     - name: Build
       run: npm run build:prod
 
+    - name: Zip 
+      uses: papeloto/action-zip@v1
+        with:
+          files: dist/email
+          dest: deploy/email.zip
+    
+    - name: Move files to deploy
+      run: mv ./src/template.yml ./deploy/template.yml
+
     - name: Set up S3 sync
       uses: jakejarvis/s3-sync-action@master
       with:
@@ -31,4 +40,4 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         AWS_REGION: 'eu-central-1'
-        SOURCE_DIR: 'src'
+        SOURCE_DIR: 'deploy'

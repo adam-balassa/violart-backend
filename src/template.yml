@@ -19,11 +19,11 @@ Resources:
       FunctionName: !Sub send_email-${Environment}
       Description: Lambda function that sends an email
       Role: !GetAtt SendEmailRole.Arn
-      Runtime: nodejs10.x
-      Handler: handler
+      Runtime: nodejs12.x
+      Handler: send_email.handler
       Code:
         S3Bucket: !Ref S3Bucket
-        S3Key: artifacts/email/send_email.js
+        S3Key: artifacts/email.zip
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -74,11 +74,11 @@ Resources:
       FunctionName: !Sub generate_violart_email_body-${Environment}
       Description: Lambda function that generates an email body
       Role: !GetAtt GenerateEmailRole.Arn
-      Runtime: nodejs10.x
-      Handler: handler
+      Runtime: nodejs12.x
+      Handler: generate_email.handler
       Code:
         S3Bucket: !Ref S3Bucket
-        S3Key: artifacts/email/generate_email.js
+        S3Key: artifacts/email.zip
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -126,11 +126,11 @@ Resources:
       FunctionName: !Sub generate_violart_email_subject-${Environment}
       Description: Lambda function that generates an email subject
       Role: !GetAtt GenerateSubjectRole.Arn
-      Runtime: nodejs10.x
-      Handler: handler
+      Runtime: nodejs12.x
+      Handler: generate_subject.handler
       Code:
         S3Bucket: !Ref S3Bucket
-        S3Key: artifacts/email/generate_subject.js
+        S3Key: artifacts/email.zip
       Tags:
         - Key: Environment
           Value: !Ref Environment
