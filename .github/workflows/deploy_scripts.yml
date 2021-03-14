@@ -28,8 +28,9 @@ jobs:
         dest: deploy/email/email.zip
     
     - name: Move files to deploy
-      run: mv ./src/email/template.yml ./deploy/email/template.yml
-      run: mv ./src/email/send_email_state_machine.json ./deploy/email/send_email_state_machine.json
+      run: |
+        mv ./src/email/template.yml ./deploy/email/template.yml
+        mv ./src/email/send_email_state_machine.json ./deploy/email/send_email_state_machine.json
 
     - name: Set up S3 sync
       uses: jakejarvis/s3-sync-action@master
