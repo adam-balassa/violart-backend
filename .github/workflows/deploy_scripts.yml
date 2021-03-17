@@ -33,4 +33,4 @@ jobs:
         mkdir -p ./deploy/email && zip -r ./deploy/email/email.zip ./dist/email
         mv ./src/email/template.yml ./deploy/email/template.yml
         mv ./src/email/send_email_state_machine.json ./deploy/email/send_email_state_machine.json
-        aws s3 sync ./deploy s3://violart/artifact --delete
+        aws s3 sync ./deploy s3://violart/artifacts --delete
