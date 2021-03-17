@@ -13,7 +13,7 @@ Parameters:
     Default: violart
 
 Resources:
-  SendEmailLambda:
+  SendEmail:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub send_email-${Environment}
@@ -68,12 +68,12 @@ Resources:
             Action: 
             - logs:CreateLogStream
             - logs:PutLogEvents
-            Resource: [!GetAtt SendEmailLogs.Arn]
+            Resource: !GetAtt SendEmailLogs.Arn
           - Effect: Allow
             Action: ses:SendEmail
             Resource: !Sub arn:aws:ses:${AWS::Region}:${AWS::AccountId}:identity/*
 
-  GenerateEmailBodyLambda:
+  GenerateEmailBody:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub generate_violart_email_body-${Environment}
@@ -94,7 +94,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
-      LogGroupName: !Sub "/aws/lambda/${GenerateEmailBodyLambda}"
+      LogGroupName: !Sub "/aws/lambda/${GenerateEmailBody}"
 
   GenerateEmailRole:
     Type: AWS::IAM::Role
@@ -128,9 +128,9 @@ Resources:
             Action: 
             - logs:CreateLogStream
             - logs:PutLogEvents
-            Resource: [!GetAtt GenerateEmailLogs.Arn]
+            Resource: !GetAtt GenerateEmailLogs.Arn
 
-  GenerateEmailSubjectLambda:
+  GenerateEmailSubject:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub generate_violart_email_subject-${Environment}
@@ -151,7 +151,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
-      LogGroupName: !Sub "/aws/lambda/${GenerateEmailSubjectLambda}"
+      LogGroupName: !Sub "/aws/lambda/${GenerateEmailSubject}"
 
   GenerateSubjectRole:
     Type: AWS::IAM::Role
@@ -185,12 +185,12 @@ Resources:
             Action: 
             - logs:CreateLogStream
             - logs:PutLogEvents
-            Resource: [!GetAtt GenerateSubjectLogs.Arn]
+            Resource: !GetAtt GenerateSubjectLogs.Arn
 
-  SendEmail:
+  SendFullEmail:
     Type: AWS::StepFunctions::StateMachine
     Properties:
-      StateMachineName: !Sub SendEmail-${Environment}
+      StateMachineName: !Sub SendFullEmail-${Environment}
       DefinitionS3Location: 
         Bucket: !Ref S3Bucket
         Key: artifacts/email/email/send_email_state_machine.json
@@ -199,10 +199,10 @@ Resources:
       LoggingConfiguration: 
         Destinations: 
         - CloudWatchLogsLogGroup: 
-            LogGroupArn: !GetAtt SendEmailStepFunctionLogs.Arn
+            LogGroupArn: !GetAtt SendFullEmailLogs.Arn
         IncludeExecutionData: true
         Level: ALL
-      RoleArn: String
+      RoleArn: !GetAtt SendFullEmailRole.Arn
       StateMachineType: STANDARD
       Tags:
         - Key: Environment
@@ -210,13 +210,53 @@ Resources:
         - Key: Application
           Value: Violart
 
-  SendEmailStepFunctionLogs:
+  SendFullEmailLogs:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
       LogGroupName: !Sub "/aws/stepfunctions/SendEmail-${Environment}"
+  
+  SendFullEmailRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: '/'
+      RoleName: !Sub generate-subject-lambda-role-${Environment}
+      AssumeRolePolicyDocument: 
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - states.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Policies:
+      - PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: 
+              - logs:CreateLogStream
+              - logs:PutLogEvents
+              Resource: !GetAtt SendFullEmailLogs.Arn
+        PolicyName: SendFullEmailLogsPolicy
+      - PolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: lambda:InvokeFunction
+              Resource: 
+              - !GetAtt SendEmail.Arn
+              - !GetAtt GenerateEmailBody.Arn
+              - !GetAtt GenerateEmailSubject.Arn
+        PolicyName: SendFullEmailCallLambdas
+      Tags:
+      - Key: Environment
+        Value: !Ref Environment
+      - Key: Application
+        Value: Violart
 
 Outputs:
   SendEmail:
     Description: The Email sender statemachine
-    Value: !Ref SendEmail
+    Value: !Ref SendFullEmail
