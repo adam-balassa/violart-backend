@@ -26,11 +26,11 @@ jobs:
         aws-region: eu-central-1
 
     - name: Build
-      run: npm run build:prod
+      run: npm run build
 
     - name: Deploy
       run:  
-        zip -j deploy/email/email.zip ./dist/email
+        mkdir -p ./deploy/email && zip -r ./deploy/email/email.zip ./dist/email
         mv ./src/email/template.yml ./deploy/email/template.yml
         mv ./src/email/send_email_state_machine.json ./deploy/email/send_email_state_machine.json
         aws s3 sync ./deploy s3://violart/artifact --delete
