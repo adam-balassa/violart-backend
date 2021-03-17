@@ -195,7 +195,9 @@ Resources:
         Bucket: !Ref S3Bucket
         Key: artifacts/email/send_email_state_machine.json
       DefinitionSubstitutions: 
-        Key : Value
+        SendEmail : !GetAtt SendEmail.Arn
+        GenerateEmailSubject : !GetAtt GenerateEmailSubject.Arn
+        GenerateEmailBody : !GetAtt GenerateEmailBody.Arn
       LoggingConfiguration: 
         Destinations: 
         - CloudWatchLogsLogGroup: 
