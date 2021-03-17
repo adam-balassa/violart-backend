@@ -40,7 +40,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       Path: '/'
-      RoleName: !Sub send-email-lambda-role-${Environment}
+      RoleName: !Sub send-email-role-${Environment}
       AssumeRolePolicyDocument: 
         Version: '2012-10-17'
         Statement:
@@ -59,7 +59,7 @@ Resources:
   SendEmailPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub send-email-lambda-policy-${Environment}
+      PolicyName: !Sub send-email-policy-${Environment}
       Roles: [!Ref SendEmailRole]
       PolicyDocument: 
         Version: "2012-10-17"
@@ -100,7 +100,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       Path: '/'
-      RoleName: !Sub generate-email-lambda-role-${Environment}
+      RoleName: !Sub generate-email-role-${Environment}
       AssumeRolePolicyDocument: 
         Version: '2012-10-17'
         Statement:
@@ -119,7 +119,7 @@ Resources:
   GenerateEmailPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub generate-email-lambda-policy-${Environment}
+      PolicyName: !Sub generate-email-policy-${Environment}
       Roles: [!Ref GenerateEmailRole]
       PolicyDocument: 
         Version: "2012-10-17"
@@ -157,7 +157,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       Path: '/'
-      RoleName: !Sub generate-subject-lambda-role-${Environment}
+      RoleName: !Sub generate-subject-role-${Environment}
       AssumeRolePolicyDocument: 
         Version: '2012-10-17'
         Statement:
@@ -176,7 +176,7 @@ Resources:
   GenerateSubjectPolicy:
     Type: AWS::IAM::Policy
     Properties:
-      PolicyName: !Sub generate-subject-lambda-policy-${Environment}
+      PolicyName: !Sub generate-subject-policy-${Environment}
       Roles: [!Ref GenerateSubjectRole]
       PolicyDocument: 
         Version: "2012-10-17"
@@ -220,7 +220,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       Path: '/'
-      RoleName: !Sub generate-subject-lambda-role-${Environment}
+      RoleName: !Sub send-full-email-role-${Environment}
       AssumeRolePolicyDocument: 
         Version: '2012-10-17'
         Statement:
