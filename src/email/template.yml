@@ -216,7 +216,7 @@ Resources:
     Type: AWS::Logs::LogGroup
     Properties:
       RetentionInDays: 7
-      LogGroupName: !Sub "/aws/stepfunctions/SendEmail-${Environment}"
+      LogGroupName: !Sub "/aws/stepfunctions/SendFullEmail-${Environment}"
   
   SendFullEmailRole:
     Type: AWS::IAM::Role
