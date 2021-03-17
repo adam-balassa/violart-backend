@@ -237,11 +237,17 @@ Resources:
           Version: "2012-10-17"
           Statement:
             - Effect: Allow
-              Action: 
-              - logs:CreateLogStream
-              - logs:PutLogEvents
-              Resource: !GetAtt SendFullEmailLogs.Arn
-        PolicyName: SendFullEmailLogsPolicy
+              Action:                 
+              - logs:CreateLogDelivery
+              - logs:GetLogDelivery
+              - logs:UpdateLogDelivery
+              - logs:DeleteLogDelivery
+              - logs:ListLogDeliveries
+              - logs:PutResourcePolicy
+              - logs:DescribeResourcePolicies
+              - logs:DescribeLogGroups
+              Resource: "*"
+        PolicyName: SendFullEmailLogsFullAccess
       - PolicyDocument:
           Version: "2012-10-17"
           Statement:
