@@ -193,7 +193,7 @@ Resources:
       StateMachineName: !Sub SendFullEmail-${Environment}
       DefinitionS3Location: 
         Bucket: !Ref S3Bucket
-        Key: artifacts/email/email/send_email_state_machine.json
+        Key: artifacts/email/send_email_state_machine.json
       DefinitionSubstitutions: 
         Key : Value
       LoggingConfiguration: 
