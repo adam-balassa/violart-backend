@@ -181,7 +181,7 @@ Resources:
       RestApiId: !Ref BackendApi
       StageName: !Ref Environment 
       StageDescription:
-        LoggingLevel: ALL
+        LoggingLevel: INFO
         MetricsEnabled: true
         Description: !Sub ${Environment} deploymentof Violart API
   
