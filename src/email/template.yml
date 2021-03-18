@@ -131,7 +131,7 @@ Resources:
       Role: !GetAtt GenerateSubjectRole.Arn
       Runtime: nodejs12.x
       Handler: generate_subject.handler
-      CodeUri: dist/generate_subject.js
+      CodeUri: dist/email/generate_subject.js
     Tags:
       - Key: Environment
         Value: !Ref Environment
