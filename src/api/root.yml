@@ -31,7 +31,7 @@ Resources:
         - Key: Application
           Value: Violart
 
-  EmailMethod:
+  EmailResource:
     Type: AWS::ApiGateway::Resource
     Properties:
       PathPart: mail
@@ -75,7 +75,7 @@ Resources:
     Properties:
       OperationName: Send automatic email
       RestApiId: !Ref BackendApi
-      ResourceId: !Ref EmailMethod
+      ResourceId: !Ref EmailResource
       HttpMethod: POST
       RequestModels:
         application/json: !Ref SendEmailRequest
@@ -92,37 +92,38 @@ Resources:
               "stateMachineArn": "${SendEmail.Outputs.SendEmailArn}"
             }
         IntegrationResponses:
-          - ResponseTemplates: 
+          - ResponseTemplates:
               application/json: '{"error": false}'
             StatusCode: "200"
             ResponseParameters:
               Access-Control-Allow-Origin: "*"
       MethodResponses:
-        - ResponseParameters: 
-            method.response.header.Access-Control-Allow-Origin : true
+        - ResponseParameters:
+            method.response.header.Access-Control-Allow-Origin: true
           StatusCode: "200"
 
-  MailOptions:
+  MailOptionsMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      OperationName: Options for CORS 
+      OperationName: Options for CORS
       RestApiId: !Ref BackendApi
-      ResourceId: !Ref EmailMethod
+      ResourceId: !Ref EmailResource
       HttpMethod: OPTIONS
       Integration:
+        Type: MOCK
         RequestTemplates:
           application/json: '{"statusCode": 200}'
         IntegrationResponses:
-          - ResponseTemplates: 
+          - ResponseTemplates:
               application/json: ""
             StatusCode: "200"
             ResponseParameters:
-              Access-Control-Allow-Headers: Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token
-              Access-Control-Allow-Methods: OPTIONS,POST
+              Access-Control-Allow-Headers: "Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token"
+              Access-Control-Allow-Methods: "OPTIONS,POST"
               Access-Control-Allow-Origin: "*"
       MethodResponses:
-        - ResponseParameters: 
-            method.response.header.Access-Control-Allow-Headers : true
-            method.response.header.Access-Control-Allow-Methods : true
-            method.response.header.Access-Control-Allow-Origin : true
+        - ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
           StatusCode: "200"
