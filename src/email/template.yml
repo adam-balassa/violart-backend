@@ -182,7 +182,7 @@ Resources:
     Type: AWS::Serverless::StateMachine
     Properties:
       Name: !Sub SendFullEmail-${Environment}
-      DefinitionUri: src/email/send_email_state_machine.json
+      DefinitionUri: send_email_state_machine.json
       DefinitionSubstitutions: 
         SendEmail : !GetAtt SendEmail.Arn
         GenerateEmailSubject : !GetAtt GenerateEmailSubject.Arn
