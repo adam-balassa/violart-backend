@@ -34,4 +34,4 @@ jobs:
           --template-file src/email/template.yml \
           --output-template-file packaged.yml \
           --s3-bucket violart --s3-prefix artifacts 
-        aws s3 cp packaged.yml s3://violart/artifacts/email/packaged.yml
+        aws s3 cp packaged.yml s3://violart/templates/email.yml
