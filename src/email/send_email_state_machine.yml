@@ -36,7 +36,6 @@ States:
       body.$: "$.formatted[0]"
       to:
         - info@violartstudio.com
-        - viola.hv@gmail.com
     Next: Send email
   Send email:
     Type: Task

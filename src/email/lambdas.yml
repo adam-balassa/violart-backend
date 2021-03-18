@@ -8,6 +8,7 @@ Parameters:
     Description: The name of the deployment environment 
     Type: String
     Default: dev
+    AllowedValues: [test, dev, prod]
 
 Resources:
   SendEmail:

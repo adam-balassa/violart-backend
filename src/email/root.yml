@@ -6,6 +6,7 @@ Parameters:
     Description: The name of the deployment environment 
     Type: String
     Default: dev
+    AllowedValues: [test, dev, prod]
   TemplateBucket:
     Description: S3 Bucket containing the nested stack template fiels
     Type: String
@@ -93,3 +94,8 @@ Resources:
           Value: !Ref Environment
         - Key: Application
           Value: Violart
+
+Outputs:
+  SendEmailArn:
+    Description: Information about the value
+    Value: !GetAtt SendFullEmail.Arn

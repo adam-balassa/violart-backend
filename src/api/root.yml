@@ -1,0 +1,128 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ViolArt Backend API
+Parameters:
+  Environment:
+    Description: Environment
+    Type: String
+    AllowedValues: [test, dev, prod]
+    Default: dev
+  TemplateBucket:
+    Description: S3 Bucket containing the nested stack template fiels
+    Type: String
+    AllowedPattern: ^[0-9A-Za-z\.\-_]*(?<!\.)$
+    Default: violart
+Resources:
+  SendEmail:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucket}.s3.eu-central-1.amazonaws.com/templates/email/root.yml
+      Parameters:
+        Environment: !Ref Environment
+        TemplateBucket: !Ref TemplateBucket
+
+  BackendApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Description: !Sub ${Environment} API for ViolArt Backend
+      Name: !Sub violart-api-${Environment}
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: Violart
+
+  EmailMethod:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      PathPart: mail
+      RestApiId: !Ref BackendApi
+      ParentId: !GetAtt BackendApi.RootResourceId
+
+  SendEmailRequest:
+    Type: "AWS::ApiGateway::Model"
+    Properties:
+      RestApiId: !Ref BackendApi
+      ContentType: application/json
+      Description: Schema for Pets example
+      Name: PetsModelNoFlatten
+      Schema:
+        type: object
+        $schema: "http://json-schema.org/draft-04/schema#"
+        required:
+          - sender
+          - subject
+          - body
+        properties:
+          sender:
+            type: string
+            pattern: "^[a-zA-Z0-9._%+-]{1,64}@(?:[a-zA-Z0-9-]{1,63}.){1,125}[a-zA-Z]{2,63}$"
+          subject:
+            type: string
+            maxLength: 30
+          body:
+            type: string
+            minLength: 3
+        title: SendEmailRequest
+
+  RequestBodyValidator:
+    Type: AWS::ApiGateway::RequestValidator
+    Properties:
+      RestApiId: !Ref BackendApi
+      ValidateRequestBody: true
+
+  SendEmailMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      OperationName: Send automatic email
+      RestApiId: !Ref BackendApi
+      ResourceId: !Ref EmailMethod
+      HttpMethod: POST
+      RequestModels:
+        application/json: !Ref SendEmailRequest
+      RequestValidatorId: !Ref RequestBodyValidator
+      Integration:
+        Type: AWS
+        Uri: !Sub arn:aws:apigateway:${AWS::Region}:states:action/StartExecution
+        IntegrationHttpMethod: POST
+        PassthroughBehavior: WHEN_NO_TEMPLATES
+        RequestTemplates:
+          application/json: !Sub |
+            { 
+              "input": "$util.escapeJavaScript($input.json('$'))",
+              "stateMachineArn": "${SendEmail.Outputs.SendEmailArn}"
+            }
+        IntegrationResponses:
+          - ResponseTemplates: 
+              application/json: '{"error": false}'
+            StatusCode: "200"
+            ResponseParameters:
+              Access-Control-Allow-Origin: "*"
+      MethodResponses:
+        - ResponseParameters: 
+            method.response.header.Access-Control-Allow-Origin : true
+          StatusCode: "200"
+
+  MailOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      OperationName: Options for CORS 
+      RestApiId: !Ref BackendApi
+      ResourceId: !Ref EmailMethod
+      HttpMethod: OPTIONS
+      Integration:
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - ResponseTemplates: 
+              application/json: ""
+            StatusCode: "200"
+            ResponseParameters:
+              Access-Control-Allow-Headers: Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token
+              Access-Control-Allow-Methods: OPTIONS,POST
+              Access-Control-Allow-Origin: "*"
+      MethodResponses:
+        - ResponseParameters: 
+            method.response.header.Access-Control-Allow-Headers : true
+            method.response.header.Access-Control-Allow-Methods : true
+            method.response.header.Access-Control-Allow-Origin : true
+          StatusCode: "200"

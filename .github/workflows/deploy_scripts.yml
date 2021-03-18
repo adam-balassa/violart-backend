@@ -38,6 +38,12 @@ jobs:
         
         sam package \
           --template-file src/email/root.yml \
-          --output-template-file root_packaged.yml \
+          --output-template-file email_root_packaged.yml \
           --s3-bucket violart --s3-prefix artifacts 
-        aws s3 cp root_packaged.yml s3://violart/templates/email/root.yml
+        aws s3 cp email_root_packaged.yml s3://violart/templates/email/root.yml
+
+        aws cloudformation package \
+          --template-file src/api/root.yml \
+          --output-template-file api_root_packaged.yml \
+          --s3-bucket violart --s3-prefix artifacts 
+        aws s3 cp api_root_packaged.yml s3://violart/templates/api/root.yml
