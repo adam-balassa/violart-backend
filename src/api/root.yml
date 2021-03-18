@@ -176,9 +176,10 @@ Resources:
 
   ApiDeployment:
     Type: AWS::ApiGateway::Deployment
+    DependsOn: [MockEndpoint, MailOptionsMethod, SendEmailMethod]
     Properties: 
       RestApiId: !Ref BackendApi
-      StageName: !Ref Environment
+      StageName: !Ref Environment 
       StageDescription:
         LoggingLevel: ALL
         MetricsEnabled: true
