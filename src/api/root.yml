@@ -154,3 +154,37 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
           StatusCode: "200"
+
+  MockEndpoint:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      OperationName: Mock Endpoint
+      RestApiId: !Ref BackendApi
+      ResourceId: !Ref EmailResource
+      HttpMethod: GET
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        RequestTemplates:
+          application/json: '{"statusCode": 200}'
+        IntegrationResponses:
+          - ResponseTemplates:
+              application/json: '{"message": "Hello World!"}'
+            StatusCode: "200"
+      MethodResponses:
+        - StatusCode: "200"
+
+  ApiDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties: 
+      RestApiId: !Ref BackendApi
+      StageName: !Ref Environment
+      StageDescription:
+        LoggingLevel: ALL
+        MetricsEnabled: true
+        Description: !Sub ${Environment} deploymentof Violart API
+  
+Outputs:
+  ApiUrl:
+    Description: Violart API invoke URL
+    Value: !Sub https://${BackendApi}.execute-api.eu-central-1.amazonaws.com/${Environment}
