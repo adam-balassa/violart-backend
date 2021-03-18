@@ -84,6 +84,7 @@ Resources:
       Integration:
         Type: AWS
         Uri: !Sub arn:aws:apigateway:${AWS::Region}:states:action/StartExecution
+        Credentials: !GetAtt MethodExecuteStateMachineRole.Arn
         IntegrationHttpMethod: POST
         PassthroughBehavior: WHEN_NO_TEMPLATES
         RequestTemplates:
@@ -97,11 +98,37 @@ Resources:
               application/json: '{"error": false}'
             StatusCode: "200"
             ResponseParameters:
-              Access-Control-Allow-Origin: '*'
+              method.response.header.Access-Control-Allow-Origin: "'*'"
       MethodResponses:
         - ResponseParameters:
             method.response.header.Access-Control-Allow-Origin: true
           StatusCode: "200"
+
+  MethodExecuteStateMachineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: /
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - apigateway.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      ManagedPolicyArns:
+        [
+          arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs,
+        ]
+      Policies:
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: states:StartExecution
+                Resource: SendEmail.Outputs.SendEmailArn
+          PolicyName: SendFullEmailCallLambdas
 
   MailOptionsMethod:
     Type: AWS::ApiGateway::Method
