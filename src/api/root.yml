@@ -43,8 +43,8 @@ Resources:
     Properties:
       RestApiId: !Ref BackendApi
       ContentType: application/json
-      Description: Schema for Pets example
-      Name: PetsModelNoFlatten
+      Description: Email sending request model
+      Name: SendEmailRequest
       Schema:
         type: object
         $schema: "http://json-schema.org/draft-04/schema#"
