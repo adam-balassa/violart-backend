@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: AWS CFN template for ViolArtStudio Backend
+Description: Serverless functions for ViolArt email management
 
 Transform: AWS::Serverless-2016-10-31
 
@@ -178,82 +178,14 @@ Resources:
             - logs:PutLogEvents
             Resource: !GetAtt GenerateSubjectLogs.Arn
 
-  SendFullEmail:
-    Type: AWS::Serverless::StateMachine
-    Properties:
-      Name: !Sub SendFullEmail-${Environment}
-      DefinitionUri: send_email_state_machine.json
-      DefinitionSubstitutions: 
-        SendEmail : !GetAtt SendEmail.Arn
-        GenerateEmailSubject : !GetAtt GenerateEmailSubject.Arn
-        GenerateEmailBody : !GetAtt GenerateEmailBody.Arn
-      Logging: 
-        Destinations: 
-        - CloudWatchLogsLogGroup: 
-            LogGroupArn: !GetAtt SendFullEmailLogs.Arn
-        IncludeExecutionData: true
-        Level: ALL
-      Role: !GetAtt SendFullEmailRole.Arn
-      Type: STANDARD
-    Tags:
-      - Key: Environment
-        Value: !Ref Environment
-      - Key: Application
-        Value: Violart
-
-  SendFullEmailLogs:
-    Type: AWS::Logs::LogGroup
-    Properties:
-      RetentionInDays: 7
-      LogGroupName: !Sub "/aws/stepfunctions/SendFullEmail-${Environment}"
-  
-  SendFullEmailRole:
-    Type: AWS::IAM::Role
-    Properties:
-      Path: '/'
-      RoleName: !Sub send-full-email-role-${Environment}
-      AssumeRolePolicyDocument: 
-        Version: '2012-10-17'
-        Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - states.amazonaws.com
-          Action:
-          - sts:AssumeRole
-      Policies:
-      - PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action:                 
-              - logs:CreateLogDelivery
-              - logs:GetLogDelivery
-              - logs:UpdateLogDelivery
-              - logs:DeleteLogDelivery
-              - logs:ListLogDeliveries
-              - logs:PutResourcePolicy
-              - logs:DescribeResourcePolicies
-              - logs:DescribeLogGroups
-              Resource: "*"
-        PolicyName: SendFullEmailLogsFullAccess
-      - PolicyDocument:
-          Version: "2012-10-17"
-          Statement:
-            - Effect: Allow
-              Action: lambda:InvokeFunction
-              Resource: 
-              - !GetAtt SendEmail.Arn
-              - !GetAtt GenerateEmailBody.Arn
-              - !GetAtt GenerateEmailSubject.Arn
-        PolicyName: SendFullEmailCallLambdas
-      Tags:
-      - Key: Environment
-        Value: !Ref Environment
-      - Key: Application
-        Value: Violart
 
 Outputs:
   SendEmail:
-    Description: The Email sender statemachine
-    Value: !Ref SendFullEmail
+    Description: SendEmail function
+    Value: !GetAtt SendEmail.Arn
+  GenerateEmailBody:
+    Description: GenerateEmailBody function
+    Value: !GetAtt GenerateEmailBody.Arn
+  GenerateEmailSubject:
+    Description: GenerateEmailSubject function
+    Value: !GetAtt GenerateEmailSubject.Arn

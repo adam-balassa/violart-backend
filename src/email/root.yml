@@ -1,0 +1,95 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: Full email sending for ViolArt Backend
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  Environment: 
+    Description: The name of the deployment environment 
+    Type: String
+    Default: dev
+  TemplateBucket:
+    Description: S3 Bucket containing the nested stack template fiels
+    Type: String
+    AllowedPattern: ^[0-9A-Za-z\.\-_]*(?<!\.)$
+    Default: violart
+Resources:
+  EmailManagement:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucket}.s3.eu-central-1.amazonaws.com/templates/email.yml
+      Parameters:
+        Environment: !Ref Environment
+
+  SendFullEmail:
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub SendFullEmail-${Environment}
+      DefinitionUri: send_email_state_machine.yml
+      DefinitionSubstitutions:
+        SendEmail: !GetAtt EmailManagement.Outputs.SendEmail
+        GenerateEmailSubject: !GetAtt EmailManagement.Outputs.GenerateEmailSubject
+        GenerateEmailBody: !GetAtt EmailManagement.Outputs.GenerateEmailBody
+      Logging:
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt SendFullEmailLogs.Arn
+        IncludeExecutionData: true
+        Level: ALL
+      Role: !GetAtt SendFullEmailRole.Arn
+      Type: STANDARD
+    Tags:
+      - Key: Environment
+        Value: !Ref Environment
+      - Key: Application
+        Value: Violart
+
+  SendFullEmailLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/aws/stepfunctions/SendFullEmail-${Environment}"
+
+  SendFullEmailRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      RoleName: !Sub send-full-email-role-${Environment}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - states.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogDelivery
+                  - logs:GetLogDelivery
+                  - logs:UpdateLogDelivery
+                  - logs:DeleteLogDelivery
+                  - logs:ListLogDeliveries
+                  - logs:PutResourcePolicy
+                  - logs:DescribeResourcePolicies
+                  - logs:DescribeLogGroups
+                Resource: "*"
+          PolicyName: SendFullEmailLogsFullAccess
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource:
+                  - !GetAtt EmailManagement.Outputs.SendEmail
+                  - !GetAtt EmailManagement.Outputs.GenerateEmailBody
+                  - !GetAtt EmailManagement.Outputs.GenerateEmailSubject
+          PolicyName: SendFullEmailCallLambdas
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: Violart

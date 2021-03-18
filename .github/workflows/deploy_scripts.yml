@@ -31,7 +31,13 @@ jobs:
     - name: Deploy
       run: |
         sam package \
-          --template-file src/email/template.yml \
-          --output-template-file packaged.yml \
+          --template-file src/email/lambdas.yml \
+          --output-template-file lambdas_packaged.yml \
           --s3-bucket violart --s3-prefix artifacts 
-        aws s3 cp packaged.yml s3://violart/templates/email.yml
+        aws s3 cp lambdas_packaged.yml s3://violart/templates/email/lambdas.yml
+        
+        sam package \
+          --template-file src/email/root.yml \
+          --output-template-file root_packaged.yml \
+          --s3-bucket violart --s3-prefix artifacts 
+        aws s3 cp root_packaged.yml s3://violart/templates/email/root.yml

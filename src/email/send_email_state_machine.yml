@@ -1,0 +1,47 @@
+Comment: Sends a formatted email to Violart Studio
+StartAt: Format message
+States:
+  Format message:
+    Type: Parallel
+    InputPath: $
+    OutputPath: $
+    ResultPath: $.formatted
+    Branches:
+      - StartAt: Generate email body
+        States:
+          Generate email body:
+            Type: Task
+            Resource: "${GenerateEmailBody}"
+            InputPath: $
+            OutputPath: $.body
+            ResultPath: $.body
+            End: true
+      - StartAt: Generate email subject
+        States:
+          Generate email subject:
+            Type: Task
+            Resource: "${GenerateEmailSubject}"
+            InputPath: $
+            OutputPath: $.subject
+            ResultPath: $.subject
+            End: true
+    Next: Create email
+  Create email:
+    Type: Pass
+    InputPath: $
+    Parameters:
+      from: info@violartstudio.com
+      replyTo.$: $.sender
+      subject.$: "$.formatted[1]"
+      body.$: "$.formatted[0]"
+      to:
+        - info@violartstudio.com
+        - viola.hv@gmail.com
+    Next: Send email
+  Send email:
+    Type: Task
+    Resource: "${SendEmail}"
+    InputPath: $
+    OutputPath: $
+    ResultPath: $
+    End: true
