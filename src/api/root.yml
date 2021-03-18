@@ -77,6 +77,7 @@ Resources:
       RestApiId: !Ref BackendApi
       ResourceId: !Ref EmailResource
       HttpMethod: POST
+      AuthorizationType: NONE
       RequestModels:
         application/json: !Ref SendEmailRequest
       RequestValidatorId: !Ref RequestBodyValidator
@@ -109,6 +110,7 @@ Resources:
       RestApiId: !Ref BackendApi
       ResourceId: !Ref EmailResource
       HttpMethod: OPTIONS
+      AuthorizationType: NONE
       Integration:
         Type: MOCK
         RequestTemplates:
