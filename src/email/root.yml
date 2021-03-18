@@ -15,7 +15,7 @@ Resources:
   EmailManagement:
     Type: AWS::CloudFormation::Stack
     Properties:
-      TemplateURL: !Sub https://${TemplateBucket}.s3.eu-central-1.amazonaws.com/templates/email.yml
+      TemplateURL: !Sub https://${TemplateBucket}.s3.eu-central-1.amazonaws.com/templates/email/lambdas.yml
       Parameters:
         Environment: !Ref Environment
 
