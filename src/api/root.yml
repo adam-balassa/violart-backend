@@ -118,16 +118,14 @@ Resources:
             Action:
               - sts:AssumeRole
       ManagedPolicyArns:
-        [
-          arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs,
-        ]
+        - arn:aws:iam::aws:policy/service-role/AmazonAPIGatewayPushToCloudWatchLogs
       Policies:
         - PolicyDocument:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
                 Action: states:StartExecution
-                Resource: SendEmail.Outputs.SendEmailArn
+                Resource: !GetAtt SendEmail.Outputs.SendEmailArn
           PolicyName: SendFullEmailCallLambdas
 
   MailOptionsMethod:
