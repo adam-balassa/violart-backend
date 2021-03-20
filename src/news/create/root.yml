@@ -190,7 +190,7 @@ Resources:
     Type: AWS::IAM::Role
     Properties:
       Path: "/"
-      RoleName: !Sub send-full-email-role-${Environment}
+      RoleName: !Sub create-news-role-${Environment}
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
         Statement:
@@ -224,7 +224,7 @@ Resources:
                 Resource:
                   - !GetAtt GenerateId.Arn
                   - !GetAtt UploadNewsToS3.Arn
-          PolicyName: SendFullEmailCallLambdas
+          PolicyName: CreateNewsCallLambdas
       Tags:
         - Key: Environment
           Value: !Ref Environment
