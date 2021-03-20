@@ -46,26 +46,116 @@ Resources:
           Value: !Ref Environment
         - Key: Application
           Value: ViolArt
-  
+
   GenerateId:
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Function
     Properties:
-      TemplateURL: !Sub https://${TemplateBucket}.s3.eu-central-1.amazonaws.com/templates/custom/lambdas.yml
-      Parameters:
-        Environment: !Ref Environment
-        FunctionName: generate-id
-        HandlerName: crate_news.generateId
-        LambdaSourcePath: dist/news/create/create_news.js
+      FunctionName: !Sub generate_id-${Environment}
+      Description: Lambda function that generates an id
+      Role: !GetAtt GenerateIdRole.Arn
+      Runtime: nodejs12.x
+      Handler: create_news.generateId
+      CodeUri: dist/news/create/create_news.js
+    Tags:
+      - Key: Environment
+        Value: !Ref Environment
+      - Key: Application
+        Value: Violart
+
+  GenerateIdLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/aws/lambda/${GenerateId}"
+
+  GenerateIdRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: '/'
+      RoleName: !Sub generate-id-role-${Environment}
+      AssumeRolePolicyDocument: 
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: Violart
+
+  GenerateIdPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub generate-id-policy-${Environment}
+      Roles: [!Ref GenerateIdRole]
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: !GetAtt GenerateIdLogs.Arn
 
   UploadNewsToS3:
-    Type: AWS::CloudFormation::Stack
+    Type: AWS::Serverless::Function
     Properties:
-      TemplateURL: !Sub https://${TemplateBucket}.s3.eu-central-1.amazonaws.com/templates/custom/lambdas.yml
-      Parameters:
-        Environment: !Ref Environment
-        FunctionName: upload-news
-        HandlerName: crate_news.uploadNewsBodyToS3
-        LambdaSourcePath: dist/news/create/create_news.js
+      FunctionName: !Sub generate_id-${Environment}
+      Description: Lambda function that uploads a news body to S3
+      Role: !GetAtt UploadNewsToS3Role.Arn
+      Runtime: nodejs12.x
+      Handler: crate_news.uploadNewsBodyToS3
+      CodeUri: dist/news/create/create_news.js
+    Tags:
+      - Key: Environment
+        Value: !Ref Environment
+      - Key: Application
+        Value: Violart
+
+  UploadNewsToS3Logs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/aws/lambda/${UploadNewsToS3}"
+
+  UploadNewsToS3Role:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: '/'
+      RoleName: !Sub upload-news-role-${Environment}
+      AssumeRolePolicyDocument: 
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: Violart
+
+  UploadNewsToS3Policy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: !Sub upload-news-policy-${Environment}
+      Roles: [!Ref UploadNewsToS3]
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Action: 
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Resource: !GetAtt UploadNewsToS3Logs.Arn
 
   CreateNews: 
     Type: AWS::Serverless::StateMachine
@@ -73,8 +163,8 @@ Resources:
       Name: !Sub CreateNews-${Environment}
       DefinitionUri: create_news.asl.yml
       DefinitionSubstitutions:
-        GenerateId: !GetAtt GenerateId.Outputs.Lambda.Arn
-        UploadNewsToS3: !GetAtt UploadNewsToS3.Outputs.Lambda.Arn
+        GenerateId: !GetAtt GenerateId.Arn
+        UploadNewsToS3: !GetAtt UploadNewsToS3.Arn
         NewsMetaDataTableName: !Sub news-${Environment}
       Logging:
         Destinations:
@@ -132,8 +222,8 @@ Resources:
               - Effect: Allow
                 Action: lambda:InvokeFunction
                 Resource:
-                  - !GetAtt GenerateId.Outputs.Lambda.Arn
-                  - !GetAtt UploadNewsToS3.Outputs.Lambda.Arn
+                  - !GetAtt GenerateId.Arn
+                  - !GetAtt UploadNewsToS3.Arn
           PolicyName: SendFullEmailCallLambdas
       Tags:
         - Key: Environment
