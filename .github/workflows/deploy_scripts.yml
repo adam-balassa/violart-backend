@@ -52,7 +52,7 @@ jobs:
           --template-file src/news/create/root.yml \
           --output-template-file create_news_packaged.yml \
           --s3-bucket violart --s3-prefix artifacts 
-        aws s3 cp create_news_packaged.yml s3://violart/news/create/root.yml
+        aws s3 cp create_news_packaged.yml s3://violart/templates/news/create/root.yml
 
         aws cloudformation package \
           --template-file src/api/root.yml \
