@@ -147,7 +147,7 @@ Resources:
     Type: AWS::IAM::Policy
     Properties:
       PolicyName: !Sub upload-news-policy-${Environment}
-      Roles: [!Ref UploadNewsToS3]
+      Roles: [!Ref UploadNewsToS3Role]
       PolicyDocument: 
         Version: "2012-10-17"
         Statement:
