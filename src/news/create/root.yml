@@ -1,0 +1,146 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: ViolArt News Management
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  Environment: 
+    Description: The name of the deployment environment 
+    Type: String
+    Default: dev
+    AllowedValues: [test, dev, prod]
+  TemplateBucket:
+    Description: S3 Bucket containing the nested stack template fiels
+    Type: String
+    AllowedPattern: ^[0-9A-Za-z\.\-_]*(?<!\.)$
+    Default: violart
+
+Resources: 
+  NewsMetaData:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub news-${Environment}
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: createdAt
+          AttributeType: "N"
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: createdAt
+          KeyType: RANGE
+      ProvisionedThroughput:   
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: ViolArt
+
+  ViolArtNewsBucket:
+    Type: AWS::S3::Bucket
+    Properties: 
+      BucketName: !Sub violart-news-${Environment}
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: ViolArt
+  
+  GenerateId:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucket}.s3.eu-central-1.amazonaws.com/templates/custom/lambdas.yml
+      Parameters:
+        Environment: !Ref Environment
+        FunctionName: generate-id
+        HandlerName: crate_news.generateId
+        LambdaSourcePath: dist/news/create/create_news.js
+
+  UploadNewsToS3:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub https://${TemplateBucket}.s3.eu-central-1.amazonaws.com/templates/custom/lambdas.yml
+      Parameters:
+        Environment: !Ref Environment
+        FunctionName: upload-news
+        HandlerName: crate_news.uploadNewsBodyToS3
+        LambdaSourcePath: dist/news/create/create_news.js
+
+  CreateNews: 
+    Type: AWS::Serverless::StateMachine
+    Properties:
+      Name: !Sub CreateNews-${Environment}
+      DefinitionUri: create_news.asl.yml
+      DefinitionSubstitutions:
+        GenerateId: !GetAtt GenerateId.Outputs.Lambda.Arn
+        UploadNewsToS3: !GetAtt UploadNewsToS3.Outputs.Lambda.Arn
+        NewsMetaDataTableName: !Sub news-${Environment}
+      Logging:
+        Destinations:
+          - CloudWatchLogsLogGroup:
+              LogGroupArn: !GetAtt CreateNewsLogs.Arn
+        IncludeExecutionData: true
+        Level: ALL
+      Role: !GetAtt CreateNewsLogsRole.Arn
+      Type: STANDARD
+    Tags:
+      - Key: Environment
+        Value: !Ref Environment
+      - Key: Application
+        Value: Violart
+
+  CreateNewsLogs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      RetentionInDays: 7
+      LogGroupName: !Sub "/aws/stepfunctions/CreateNewsLogs-${Environment}"
+
+  CreateNewsLogsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      Path: "/"
+      RoleName: !Sub send-full-email-role-${Environment}
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - states.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogDelivery
+                  - logs:GetLogDelivery
+                  - logs:UpdateLogDelivery
+                  - logs:DeleteLogDelivery
+                  - logs:ListLogDeliveries
+                  - logs:PutResourcePolicy
+                  - logs:DescribeResourcePolicies
+                  - logs:DescribeLogGroups
+                Resource: "*"
+          PolicyName: CreateNewsLogsFullAccess
+        - PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: lambda:InvokeFunction
+                Resource:
+                  - !GetAtt GenerateId.Outputs.Lambda.Arn
+                  - !GetAtt UploadNewsToS3.Outputs.Lambda.Arn
+          PolicyName: SendFullEmailCallLambdas
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+        - Key: Application
+          Value: Violart
+
+    
+
+    

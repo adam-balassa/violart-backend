@@ -1,0 +1,36 @@
+Comment: Creates a news record for ViolArtStudio ${Environment}
+StartAt: GenerateId
+States:
+  GenerateId:
+    Type: Task
+    Resource: "${GenerateId}"
+    Next: CreateNews
+  CreateNews:
+    Type: Parallel
+    Branches:
+      - StartAt: UploadNewsToS3
+        States: 
+          UploadNewsToS3:
+            Type: Task
+            Resource: ${UploadNewsToS3}
+            End: true
+      - StartAt: UploadNewsMetadataToDynamoDb
+        States: 
+          UploadNewsMetadataToDynamoDb:
+            Type: Task
+            Resource: arn:aws:states:::dynamodb:putItem
+            Parameters: 
+              TableName: ${NewsMetaDataTableName}
+              Item:
+                  id: { S: $.id }
+                  backgroundColor: { S: $.backgroundColor }
+                  name: { S: $.name }
+                  createdAt: { S: $.createdAt }
+                  bucketName: { S: $.bucketName }
+                  prefix: { S: $.prefix }   
+            OutputPath: $.id
+            ResultPath: $.id
+            End: true
+        
+    End: true
+
