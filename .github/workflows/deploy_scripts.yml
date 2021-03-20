@@ -31,12 +31,6 @@ jobs:
     - name: Deploy
       run: |
         sam package \
-          --template-file src/custom/lambda.yml \
-          --output-template-file lambda_packaged.yml \
-          --s3-bucket violart --s3-prefix artifacts 
-        aws s3 cp lambda_packaged.yml s3://violart/templates/custom/lambda.yml
-
-        sam package \
           --template-file src/email/lambdas.yml \
           --output-template-file lambdas_packaged.yml \
           --s3-bucket violart --s3-prefix artifacts 
