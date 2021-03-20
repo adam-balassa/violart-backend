@@ -50,7 +50,7 @@ Resources:
   GenerateId:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub generate_id-${Environment}
+      FunctionName: !Sub generate-id-${Environment}
       Description: Lambda function that generates an id
       Role: !GetAtt GenerateIdRole.Arn
       Runtime: nodejs12.x
@@ -105,7 +105,7 @@ Resources:
   UploadNewsToS3:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: !Sub generate_id-${Environment}
+      FunctionName: !Sub upload-news-to-s3-${Environment}
       Description: Lambda function that uploads a news body to S3
       Role: !GetAtt UploadNewsToS3Role.Arn
       Runtime: nodejs12.x
